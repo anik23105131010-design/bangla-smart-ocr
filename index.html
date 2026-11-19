@@ -1,0 +1,880 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bangla Smart OCR</title>
+<style>
+:root {
+  --bg:#0f1729;
+  --panel:#1e293b;
+  --border:#394c65;
+  --text:#f8fafc;
+  --muted:#aabbd0;
+  --green:#29db83;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:system-ui,"Noto Sans Bengali",sans-serif;
+}
+.wrap { max-width:1380px; margin:auto; padding:16px; }
+header,section {
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:16px; padding:18px;
+}
+header {
+  display:flex; justify-content:space-between;
+  align-items:center; gap:12px; flex-wrap:wrap;
+  margin-bottom:16px;
+}
+h1 { font-size:22px; margin:0; }
+h2 { font-size:17px; margin:0 0 14px; }
+h3 { font-size:14px; margin:18px 0 10px; }
+#status { color:#ffcc77; font-size:13px; }
+.layout {
+  display:grid; grid-template-columns:1fr 1fr; gap:16px;
+}
+.canvas-box {
+  position:relative; width:100%; max-width:460px;
+  aspect-ratio:1; background:#020617;
+  border:2px solid #38bdf8;
+  border-radius:14px; overflow:hidden;
+  margin:auto; touch-action:none;
+}
+#pad {
+  width:100%; height:100%; display:block;
+  touch-action:none;
+}
+.guides {
+  position:absolute; inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(to right,
+      transparent 49.8%,#31527a 50%,transparent 50.2%),
+    linear-gradient(to bottom,
+      transparent 26%,#31527a 26.3%,transparent 26.6%),
+    linear-gradient(to bottom,
+      transparent 50%,#31527a 50.3%,transparent 50.6%);
+  opacity:.65;
+}
+.guides span {
+  position:absolute; top:19%; left:7%;
+  color:#60a5fa; font-size:11px;
+}
+.controls {
+  display:flex; flex-wrap:wrap; gap:10px;
+  align-items:center; justify-content:space-between;
+  margin:14px 0;
+}
+.buttons {
+  display:grid; grid-template-columns:repeat(4,1fr);
+  gap:8px; margin-top:10px;
+}
+button {
+  border:0; color:white; border-radius:10px;
+  padding:12px 9px; font-weight:700;
+  cursor:pointer; background:#34455f;
+}
+button:disabled { opacity:.4; cursor:not-allowed; }
+.green { background:#16a34a; }
+.blue { background:#2563eb; }
+.red { background:#dc2626; }
+label { font-size:13px; }
+input[type=checkbox],input[type=radio] { accent-color:#38bdf8; }
+input[type=range] { accent-color:#2563eb; width:110px; }
+#cameraBox {
+  position:absolute; inset:0; background:#000;
+  display:flex; flex-direction:column; z-index:5;
+}
+#cameraBox[hidden] { display:none; }
+video {
+  width:100%; min-height:0; flex:1;
+  object-fit:contain; transform:none;
+}
+.camera-actions {
+  display:flex; gap:5px; padding:8px;
+  justify-content:center;
+}
+.camera-actions button { font-size:12px; }
+.note {
+  color:var(--muted); font-size:12px;
+  line-height:1.6;
+}
+.result {
+  background:#101827; border:1px solid var(--border);
+  border-radius:14px; padding:15px;
+  display:flex; justify-content:space-between;
+  align-items:center; gap:10px;
+}
+#letter {
+  font-size:100px; color:var(--green);
+  line-height:1.2; font-weight:700;
+}
+#info { color:#cbd5e1; font-size:13px; }
+#preview {
+  width:100px; height:100px; background:white;
+  image-rendering:pixelated; border-radius:9px;
+  border:1px solid #64748b;
+}
+.predrow {
+  display:flex; align-items:center; gap:10px;
+  margin:12px 0;
+}
+.predchar { font-size:22px; width:30px; }
+.bar {
+  height:14px; flex:1; background:#101827;
+  border-radius:20px; overflow:hidden;
+}
+.fill {
+  height:100%; background:#22c55e;
+  border-radius:20px;
+}
+.score { width:55px; text-align:right; font-size:12px; }
+.box {
+  background:#101827; border:1px solid var(--border);
+  border-radius:14px; margin-top:20px; padding:14px;
+}
+#word {
+  min-height:55px; font-size:28px;
+  overflow-wrap:anywhere; white-space:pre-wrap;
+}
+.wordbuttons {
+  display:grid; grid-template-columns:repeat(5,1fr);
+  gap:7px;
+}
+.wordbuttons button { padding:10px 4px; font-size:12px; }
+select {
+  background:#26354b; color:white;
+  padding:10px; border-radius:8px; border:1px solid #64748b;
+}
+#feedbackStatus,#message {
+  color:#bcd0e8; font-size:12px; line-height:1.6;
+}
+footer { margin-top:15px; color:#94a3b8; font-size:12px; }
+@media(max-width:850px) {
+  .layout { grid-template-columns:1fr; }
+  .wrap { padding:9px; }
+  h1 { font-size:17px; }
+  section { padding:13px; }
+}
+@media(max-width:380px) {
+  button { font-size:11px; padding:11px 5px; }
+  .wordbuttons { grid-template-columns:repeat(3,1fr); }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>বাংলা হস্তাক্ষর শনাক্তকরণ · Bangla Smart OCR</h1>
+  <strong id="status">Loading CNN...</strong>
+</header>
+
+<main class="layout">
+<section>
+  <h2>Drawing Pad / Camera / Upload</h2>
+
+  <div class="canvas-box" id="dropZone">
+    <canvas id="pad" width="512" height="512"></canvas>
+    <div class="guides" id="guides">
+      <span>মাত্রা (Matra guide)</span>
+    </div>
+    <div id="cameraBox" hidden>
+      <video id="video" autoplay muted playsinline></video>
+      <div class="camera-actions">
+        <button class="green" id="capture">📸 Capture</button>
+        <button id="switch">Switch</button>
+        <button class="red" id="stopCamera">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <label>Pen:
+      <input id="pen" type="range" min="2" max="20" value="8">
+    </label>
+    <label><input id="guideToggle" type="checkbox" checked>
+      Guide Lines</label>
+    <label><input id="auto" type="checkbox" checked>
+      Auto-Predict</label>
+  </div>
+
+  <div class="buttons">
+    <button class="green" id="predict">Predict</button>
+    <button id="undo">Undo</button>
+    <button class="red" id="clear">Clear</button>
+    <button class="blue" id="camera">📷 Camera</button>
+  </div>
+
+  <div class="buttons" style="grid-template-columns:1fr 1fr">
+    <button id="upload">Upload / Photo</button>
+    <button id="saveDrawing">Save PNG</button>
+  </div>
+
+  <input id="file" type="file" accept="image/*" hidden>
+  <input id="nativeCamera" type="file"
+    accept="image/*" capture="environment" hidden>
+
+  <p class="note">
+    Smooth 512×512 drawing pad. The CNN receives a 64×64
+    grayscale image. On mobile, use Camera for a live preview
+    or Upload / Photo for the device's native camera chooser.
+  </p>
+  <p id="message">Ready for drawing.</p>
+</section>
+
+<section>
+  <h2>PREDICTED CHARACTER — 50 CLASSES</h2>
+
+  <div class="result">
+    <div>
+      <div id="letter">?</div>
+      <div id="info">Waiting for prediction</div>
+      <button id="speak">🔊 Pronounce</button>
+    </div>
+    <div style="text-align:center;font-size:12px">
+      CNN Input (64×64)<br>
+      <canvas id="preview" width="64" height="64"></canvas>
+    </div>
+  </div>
+
+  <h3 style="color:#facc15">TOP-5 PREDICTIONS</h3>
+  <div id="top5" class="note">
+    The actual CNN predictions will appear here.
+  </div>
+
+  <div class="box">
+    <h3>LIVE WORD COMPOSER</h3>
+    <div id="word"></div>
+    <div class="wordbuttons">
+      <button class="blue" id="add">+ Add</button>
+      <button id="space">Space</button>
+      <button id="back">Back</button>
+      <button id="copy">Copy</button>
+      <button class="red" id="reset">Reset</button>
+    </div>
+  </div>
+
+  <div class="box">
+    <h3>CORRECT / WRONG FEEDBACK</h3>
+    <label><input type="radio" name="vote" value="Correct">
+      Correct</label>
+    <label><input type="radio" name="vote" value="Wrong">
+      Wrong</label>
+    <div style="margin-top:12px">
+      <select id="correctLetter">
+        <option value="">Choose correct letter</option>
+      </select>
+      <button class="blue" id="submit">Save Feedback</button>
+    </div>
+    <p id="feedbackStatus"></p>
+    <button id="exportFeedback">Export My Feedback JSON</button>
+    <p class="note">
+      Feedback stays in this browser until exported.
+      It does not automatically retrain the CNN.
+    </p>
+  </div>
+</section>
+</main>
+
+<footer>
+  Browser-based prototype · Your original 50-class CNN ·
+  Requires internet to load the browser inference libraries.
+</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-tflite@0.0.1-alpha.10/dist/tf-tflite.min.js"></script>
+
+<script>
+const $ = id => document.getElementById(id);
+const pad = $("pad");
+const ctx = pad.getContext("2d", {willReadFrequently:true});
+const preview = $("preview");
+const pctx = preview.getContext("2d", {willReadFrequently:true});
+
+let model=null, labels=[], currentLetter="", currentScores=[];
+let currentHash="", currentMode="drawing";
+let stream=null, facing="environment";
+let drawing=false, previous=null, undoStack=[];
+let predictionTimer=null, requestNumber=0;
+
+function message(text) { $("message").textContent=text; }
+
+function clearCanvas() {
+  ctx.fillStyle="#020617";
+  ctx.fillRect(0,0,512,512);
+  currentMode="drawing";
+  currentLetter="";
+  $("letter").textContent="?";
+  $("info").textContent="Waiting for prediction";
+  $("top5").textContent="Draw or upload a character.";
+  pctx.fillStyle="white";
+  pctx.fillRect(0,0,64,64);
+}
+
+function schedule() {
+  const number=++requestNumber;
+  clearTimeout(predictionTimer);
+  if ($("auto").checked) {
+    predictionTimer=setTimeout(()=>recognize(number),600);
+  }
+}
+
+function point(event) {
+  const rect=pad.getBoundingClientRect();
+  return {
+    x:(event.clientX-rect.left)*512/rect.width,
+    y:(event.clientY-rect.top)*512/rect.height
+  };
+}
+
+pad.addEventListener("pointerdown",event=>{
+  if(!$("cameraBox").hidden)return;
+  drawing=true;
+  ++requestNumber;
+  clearTimeout(predictionTimer);
+  undoStack.push(ctx.getImageData(0,0,512,512));
+  if(undoStack.length>20)undoStack.shift();
+  previous=point(event);
+  pad.setPointerCapture(event.pointerId);
+  ctx.fillStyle="white";
+  ctx.beginPath();
+  ctx.arc(previous.x,previous.y,Number($("pen").value)/2,0,Math.PI*2);
+  ctx.fill();
+  event.preventDefault();
+});
+
+pad.addEventListener("pointermove",event=>{
+  if(!drawing)return;
+  const next=point(event);
+  ctx.strokeStyle="white";
+  ctx.lineWidth=Number($("pen").value);
+  ctx.lineCap="round";
+  ctx.lineJoin="round";
+  ctx.beginPath();
+  ctx.moveTo(previous.x,previous.y);
+  ctx.lineTo(next.x,next.y);
+  ctx.stroke();
+  previous=next;
+  event.preventDefault();
+});
+
+function finishStroke() {
+  if(!drawing)return;
+  drawing=false;
+  schedule();
+}
+pad.addEventListener("pointerup",finishStroke);
+pad.addEventListener("pointercancel",finishStroke);
+
+$("clear").onclick=()=>{
+  ++requestNumber;
+  undoStack=[];
+  clearCanvas();
+};
+
+$("undo").onclick=()=>{
+  if(!undoStack.length)return;
+  ctx.putImageData(undoStack.pop(),0,0);
+  schedule();
+};
+
+$("guideToggle").onchange=()=>{
+  $("guides").style.display=$("guideToggle").checked?"":"none";
+};
+
+$("predict").onclick=()=>{
+  clearTimeout(predictionTimer);
+  recognize(++requestNumber);
+};
+
+$("upload").onclick=()=>$("file").click();
+
+function importImage(image) {
+  ++requestNumber;
+  clearTimeout(predictionTimer);
+  undoStack=[];
+  currentMode="photo";
+
+  ctx.fillStyle="white";
+  ctx.fillRect(0,0,512,512);
+
+  const scale=Math.min(512/image.width,512/image.height);
+  const width=image.width*scale;
+  const height=image.height*scale;
+  ctx.drawImage(
+    image,
+    (512-width)/2,(512-height)/2,
+    width,height
+  );
+
+  schedule();
+}
+
+function openImageFile(file) {
+  if(!file || !file.type.startsWith("image/"))return;
+  const url=URL.createObjectURL(file);
+  const image=new Image();
+  image.onload=()=>{
+    importImage(image);
+    URL.revokeObjectURL(url);
+  };
+  image.onerror=()=>{
+    URL.revokeObjectURL(url);
+    message("Could not open this image.");
+  };
+  image.src=url;
+}
+
+$("file").onchange=e=>{
+  openImageFile(e.target.files[0]);
+  e.target.value="";
+};
+$("nativeCamera").onchange=e=>{
+  openImageFile(e.target.files[0]);
+  e.target.value="";
+};
+
+$("dropZone").addEventListener("dragover",e=>e.preventDefault());
+$("dropZone").addEventListener("drop",e=>{
+  e.preventDefault();
+  openImageFile(e.dataTransfer.files[0]);
+});
+
+document.addEventListener("paste",e=>{
+  for(const item of e.clipboardData?.items||[]) {
+    if(item.type.startsWith("image/")) {
+      openImageFile(item.getAsFile());
+      break;
+    }
+  }
+});
+
+// Camera: browser webcam, with native-device fallback.
+async function startCamera() {
+  if(!navigator.mediaDevices?.getUserMedia) {
+    $("nativeCamera").click();
+    return;
+  }
+  try {
+    stopCamera();
+    stream=await navigator.mediaDevices.getUserMedia({
+      audio:false,
+      video:{facingMode:{ideal:facing}}
+    });
+    $("cameraBox").hidden=false;
+    $("video").srcObject=stream;
+    await $("video").play();
+    message("Camera opened. Capture a Bengali character.");
+  } catch(error) {
+    message("Camera unavailable: "+error.message+
+      ". Trying device camera chooser.");
+    $("nativeCamera").click();
+  }
+}
+
+function stopCamera() {
+  if(stream) stream.getTracks().forEach(track=>track.stop());
+  stream=null;
+  $("video").srcObject=null;
+  $("cameraBox").hidden=true;
+}
+
+$("camera").onclick=startCamera;
+$("stopCamera").onclick=stopCamera;
+
+$("switch").onclick=async()=>{
+  facing=facing==="environment"?"user":"environment";
+  await startCamera();
+};
+
+$("capture").onclick=()=>{
+  const video=$("video");
+  if(!video.videoWidth) {
+    message("Camera is not ready.");
+    return;
+  }
+  const photo=document.createElement("canvas");
+  photo.width=video.videoWidth;
+  photo.height=video.videoHeight;
+  photo.getContext("2d").drawImage(video,0,0);
+  stopCamera();
+  importImage(photo);
+};
+
+$("saveDrawing").onclick=()=>{
+  const a=document.createElement("a");
+  a.href=pad.toDataURL("image/png");
+  a.download="bangla-character.png";
+  a.click();
+};
+
+// Prepare 64x64 grayscale data. This is a browser
+// approximation of the Python Enhanced preprocessing.
+// Real-image parity must be evaluated before final release.
+function prepareInput() {
+  const w=512,h=512;
+  const data=ctx.getImageData(0,0,w,h).data;
+  const gray=new Uint8Array(w*h);
+  const borders=[];
+
+  for(let i=0;i<w*h;i++) {
+    const j=i*4;
+    gray[i]=Math.round(
+      .299*data[j]+.587*data[j+1]+.114*data[j+2]
+    );
+  }
+
+  for(let x=0;x<w;x+=4) {
+    borders.push(gray[x],gray[(h-1)*w+x]);
+  }
+  for(let y=0;y<h;y+=4) {
+    borders.push(gray[y*w],gray[y*w+w-1]);
+  }
+
+  borders.sort((a,b)=>a-b);
+  if(borders[Math.floor(borders.length/2)]<128) {
+    for(let i=0;i<gray.length;i++)gray[i]=255-gray[i];
+  }
+
+  // Light smoothing before Otsu threshold.
+  const blurred=new Uint8Array(w*h);
+  for(let y=1;y<h-1;y++) {
+    for(let x=1;x<w-1;x++) {
+      const i=y*w+x;
+      blurred[i]=Math.round((
+        gray[i-w-1]+2*gray[i-w]+gray[i-w+1]+
+        2*gray[i-1]+4*gray[i]+2*gray[i+1]+
+        gray[i+w-1]+2*gray[i+w]+gray[i+w+1]
+      )/16);
+    }
+  }
+  for(let x=0;x<w;x++) {
+    blurred[x]=gray[x];
+    blurred[(h-1)*w+x]=gray[(h-1)*w+x];
+  }
+  for(let y=0;y<h;y++) {
+    blurred[y*w]=gray[y*w];
+    blurred[y*w+w-1]=gray[y*w+w-1];
+  }
+
+  const hist=new Uint32Array(256);
+  let sum=0;
+  for(const v of blurred) { hist[v]++; sum+=v; }
+
+  let weightB=0,sumB=0,best=-1,threshold=127;
+  for(let t=0;t<256;t++) {
+    weightB+=hist[t];
+    if(!weightB)continue;
+    const weightF=blurred.length-weightB;
+    if(!weightF)break;
+    sumB+=t*hist[t];
+    const diff=sumB/weightB-(sum-sumB)/weightF;
+    const variance=weightB*weightF*diff*diff;
+    if(variance>best) {
+      best=variance;
+      threshold=t;
+    }
+  }
+
+  const binary=document.createElement("canvas");
+  binary.width=w;binary.height=h;
+  const bctx=binary.getContext("2d");
+  const out=bctx.createImageData(w,h);
+  let minX=w,minY=h,maxX=-1,maxY=-1;
+
+  for(let y=0;y<h;y++) {
+    for(let x=0;x<w;x++) {
+      const i=y*w+x;
+      const pixel=blurred[i]<=threshold?0:255;
+      const j=i*4;
+      out.data[j]=pixel;
+      out.data[j+1]=pixel;
+      out.data[j+2]=pixel;
+      out.data[j+3]=255;
+
+      if(pixel===0) {
+        minX=Math.min(minX,x);maxX=Math.max(maxX,x);
+        minY=Math.min(minY,y);maxY=Math.max(maxY,y);
+      }
+    }
+  }
+  bctx.putImageData(out,0,0);
+
+  if(maxX<0) throw Error("No character detected.");
+
+  // Crop the drawing tightly, keeping a little margin.
+  // Keep whole frame for photographed characters.
+  let x=0,y=0,bw=w,bh=h;
+  if(currentMode==="drawing") {
+    const padPx=Math.round(
+      .12*Math.max(maxX-minX+1,maxY-minY+1)
+    );
+    x=Math.max(0,minX-padPx);
+    y=Math.max(0,minY-padPx);
+    const right=Math.min(w,maxX+1+padPx);
+    const bottom=Math.min(h,maxY+1+padPx);
+    bw=right-x;bh=bottom-y;
+  }
+
+  pctx.fillStyle="white";
+  pctx.fillRect(0,0,64,64);
+  const scale=Math.min(56/bw,56/bh);
+  const dw=bw*scale,dh=bh*scale;
+  pctx.imageSmoothingEnabled=true;
+  pctx.imageSmoothingQuality="high";
+  pctx.drawImage(
+    binary,x,y,bw,bh,
+    (64-dw)/2,(64-dh)/2,dw,dh
+  );
+
+  const pixels=pctx.getImageData(0,0,64,64).data;
+  const input=new Float32Array(4096);
+  const bytes=new Uint8Array(4096);
+
+  for(let i=0;i<4096;i++) {
+    input[i]=pixels[i*4];
+    bytes[i]=pixels[i*4];
+  }
+
+  return {input,bytes};
+}
+
+async function imageHash(bytes) {
+  const digest=await crypto.subtle.digest("SHA-256",bytes);
+  return Array.from(new Uint8Array(digest))
+    .map(n=>n.toString(16).padStart(2,"0")).join("");
+}
+
+function feedbackDB() {
+  try {
+    return JSON.parse(localStorage.getItem("banglaOCRFeedback")||"{}");
+  } catch { return {}; }
+}
+
+function updatePredictions(scores,letter,source) {
+  $("letter").textContent=letter;
+  const vowels=new Set(
+    ["অ","আ","ই","ঈ","উ","ঊ","ঋ","এ","ঐ","ও","ঔ"]
+  );
+  const signs=new Set(["ঁ","ং","ঃ"]);
+  const category=vowels.has(letter)?"Vowel":
+    signs.has(letter)?"Bengali sign":"Consonant";
+
+  $("info").textContent=category+" • "+source;
+
+  const indices=Array.from(scores.keys())
+    .sort((a,b)=>scores[b]-scores[a]).slice(0,5);
+
+  $("top5").replaceChildren();
+
+  for(const index of indices) {
+    const row=document.createElement("div");
+    row.className="predrow";
+
+    const char=document.createElement("strong");
+    char.className="predchar";
+    char.textContent=labels[index];
+
+    const bar=document.createElement("div");
+    bar.className="bar";
+
+    const fill=document.createElement("div");
+    fill.className="fill";
+    fill.style.width=Math.max(0,Math.min(100,scores[index]*100))+"%";
+    bar.appendChild(fill);
+
+    const score=document.createElement("span");
+    score.className="score";
+    score.textContent=(scores[index]*100).toFixed(1)+"%";
+
+    row.append(char,bar,score);
+    $("top5").appendChild(row);
+  }
+}
+
+async function recognize(number) {
+  if(!model) {
+    message("CNN is not loaded. Check the model status.");
+    return;
+  }
+  try {
+    const prepared=prepareInput();
+    const hash=await imageHash(prepared.bytes);
+    if(number!==requestNumber)return;
+
+    const tensor=tf.tensor4d(
+      prepared.input,[1,64,64,1],"float32"
+    );
+
+    let result;
+    try {
+      result=model.predict(tensor);
+      const output=Array.isArray(result)?result[0]:result;
+      var scores=Array.from(await output.data());
+    } finally {
+      tensor.dispose();
+      if(result) {
+        (Array.isArray(result)?result:[result])
+          .forEach(t=>t.dispose?.());
+      }
+    }
+
+    if(number!==requestNumber)return;
+
+    if(scores.length!==50) {
+      throw Error("Expected 50 CNN outputs, received "+scores.length);
+    }
+
+    const best=scores.indexOf(Math.max(...scores));
+    currentScores=scores;
+    currentHash=hash;
+
+    const correction=feedbackDB()[hash];
+    currentLetter=correction?.label||labels[best];
+
+    updatePredictions(
+      scores,currentLetter,
+      correction?"Saved local correction":"CNN prediction"
+    );
+    message("Prediction updated. Please verify the character.");
+  } catch(error) {
+    message("Prediction error: "+error.message);
+    console.error(error);
+  }
+}
+
+// Word composer
+$("add").onclick=()=>{
+  if(currentLetter)$("word").textContent+=currentLetter;
+};
+$("space").onclick=()=>$("word").textContent+=" ";
+$("back").onclick=()=>{
+  const a=Array.from($("word").textContent);
+  a.pop();
+  $("word").textContent=a.join("");
+};
+$("reset").onclick=()=>$("word").textContent="";
+$("copy").onclick=async()=>{
+  await navigator.clipboard.writeText($("word").textContent);
+  message("Word copied.");
+};
+
+// Audio: use provided MP3 when available. Browser TTS
+// is only a fallback and may pronounce isolated letters poorly.
+$("speak").onclick=async()=>{
+  if(!currentLetter)return;
+  const audio=new Audio(
+    "./audio/"+encodeURIComponent(currentLetter)+".mp3"
+  );
+  try {
+    await audio.play();
+  } catch {
+    if(!("speechSynthesis" in window)) {
+      message("No pronunciation audio is available.");
+      return;
+    }
+    const utterance=new SpeechSynthesisUtterance(currentLetter);
+    utterance.lang="bn-BD";
+    speechSynthesis.speak(utterance);
+    message("Using browser speech. Pronunciation may vary.");
+  }
+};
+
+// Local correction memory. Not a shared online database.
+$("submit").onclick=()=>{
+  const vote=document.querySelector(
+    'input[name="vote"]:checked'
+  )?.value;
+
+  if(!currentHash||!vote) {
+    $("feedbackStatus").textContent=
+      "Make a prediction and select Correct or Wrong.";
+    return;
+  }
+
+  const correct=vote==="Wrong"
+    ?$("correctLetter").value
+    :currentLetter;
+
+  if(!correct) {
+    $("feedbackStatus").textContent="Choose the correct letter.";
+    return;
+  }
+
+  const db=feedbackDB();
+  db[currentHash]={
+    label:correct,
+    vote:vote,
+    savedAt:new Date().toISOString()
+  };
+  localStorage.setItem("banglaOCRFeedback",JSON.stringify(db));
+
+  currentLetter=correct;
+  updatePredictions(currentScores,correct,"Saved local correction");
+  $("feedbackStatus").textContent=
+    "Saved in this browser. Export feedback for permanent backup.";
+};
+
+$("exportFeedback").onclick=()=>{
+  const blob=new Blob(
+    [JSON.stringify(feedbackDB(),null,2)],
+    {type:"application/json"}
+  );
+  const link=document.createElement("a");
+  link.href=URL.createObjectURL(blob);
+  link.download="bangla_feedback_export.json";
+  link.click();
+  setTimeout(()=>URL.revokeObjectURL(link.href),1000);
+};
+
+// Load real TFLite model and Bengali labels.
+async function loadModel() {
+  try {
+    const response=await fetch("./model/labels.json");
+    if(!response.ok)throw Error("Could not load labels.json");
+    labels=await response.json();
+
+    if(labels.length!==50)throw Error("Expected 50 labels");
+
+    labels.forEach(letter=>{
+      const option=document.createElement("option");
+      option.value=letter;
+      option.textContent=letter;
+      $("correctLetter").appendChild(option);
+    });
+
+    if(!window.tf||!window.tflite) {
+      throw Error("Browser AI libraries did not load.");
+    }
+
+    await tf.ready();
+
+    tflite.setWasmPath(
+      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-tflite@0.0.1-alpha.10/dist/"
+    );
+
+    model=await tflite.loadTFLiteModel(
+      "./model/bangla_cnn.tflite"
+    );
+
+    $("status").textContent="● CNN Ready • 50 Classes";
+    $("status").style.color="#29db83";
+    message("CNN loaded. Draw or photograph a Bengali letter.");
+  } catch(error) {
+    $("status").textContent="⚠ CNN loading failed";
+    $("status").style.color="#fca5a5";
+    message(error.message);
+    console.error(error);
+  }
+}
+
+clearCanvas();
+loadModel();
+window.addEventListener("pagehide",stopCamera);
+</script>
+</body>
+</html>
