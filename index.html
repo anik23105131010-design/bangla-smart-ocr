@@ -363,6 +363,13 @@ body:not(.light-theme) section {
 
 
 </style>
+
+<!-- Bangla Smart OCR PWA -->
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png"
+      href="./icons/icon-192.png">
+<meta name="theme-color" content="#14283f">
+
 </head>
 <body>
 <div class="wrap">
@@ -1454,5 +1461,35 @@ clearCanvas();
 loadModel();
 window.addEventListener("pagehide",stopCamera);
 </script>
+
+<script>
+if ("serviceWorker" in navigator) {
+
+  window.addEventListener("load", () => {
+
+    navigator.serviceWorker
+      .register("./sw.js")
+      .then(registration => {
+
+        console.log(
+          "Bangla Smart OCR PWA registered:",
+          registration.scope
+        );
+
+      })
+      .catch(error => {
+
+        console.error(
+          "PWA registration failed:",
+          error
+        );
+
+      });
+
+  });
+
+}
+</script>
+
 </body>
 </html>
