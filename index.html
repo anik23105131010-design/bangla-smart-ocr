@@ -361,6 +361,201 @@ body:not(.light-theme) section {
     backdrop-filter: blur(6px);
 }
 
+/* ============================================
+   BANGLA SMART OCR - MOBILE APP LAYOUT
+   Desktop: Two columns
+   Mobile: One column, stacked vertically
+============================================ */
+
+@media screen and (max-width: 1100px) {
+
+  html {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    width: 100%;
+    margin: 0;
+    overflow-x: hidden;
+    font-size: 16px;
+  }
+
+  /* Fill mobile screen properly */
+  .wrap {
+    width: 100% !important;
+    max-width: 650px !important;
+    margin: 0 auto !important;
+    padding: 12px !important;
+  }
+
+  /* Stack right panel BELOW drawing pad */
+  main.layout,
+  .layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 16px !important;
+  }
+
+  .layout > section {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  section {
+    padding: 16px !important;
+    border-radius: 16px !important;
+  }
+
+  /* Header looks better on mobile */
+  header {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 12px !important;
+  }
+
+  .site-title h1 {
+    font-size: 21px !important;
+    line-height: 1.5;
+  }
+
+  .site-title p {
+    font-size: 13px !important;
+  }
+
+  .header-actions {
+    justify-content: center !important;
+    flex-wrap: wrap;
+  }
+
+  /* Drawing area becomes large */
+  .canvas-box {
+    width: 100% !important;
+    max-width: 450px !important;
+    aspect-ratio: 1 / 1 !important;
+    margin: 0 auto !important;
+  }
+
+  #pad {
+    width: 100% !important;
+    height: 100% !important;
+    touch-action: none;
+  }
+
+  /* Larger controls */
+  .controls {
+    display: flex !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+    margin: 16px 0 !important;
+  }
+
+  /* Two large buttons per row */
+  .buttons {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+      !important;
+    gap: 10px !important;
+  }
+
+  .buttons button {
+    min-height: 48px !important;
+    font-size: 15px !important;
+    padding: 12px 8px !important;
+  }
+
+  /* Recognition result */
+  .result {
+    padding: 18px !important;
+    gap: 15px !important;
+    min-height: 180px;
+  }
+
+  #letter {
+    font-size: 85px !important;
+  }
+
+  #info {
+    font-size: 14px !important;
+  }
+
+  #preview {
+    width: 90px !important;
+    height: 90px !important;
+  }
+
+  /* Prediction bars */
+  .predrow {
+    margin: 16px 0 !important;
+    gap: 12px !important;
+  }
+
+  .predchar {
+    font-size: 27px !important;
+  }
+
+  .bar {
+    height: 17px !important;
+  }
+
+  .score {
+    font-size: 14px !important;
+  }
+
+  /* Feedback section */
+  .box {
+    padding: 16px !important;
+  }
+
+  .box button {
+    min-height: 44px;
+    font-size: 14px;
+  }
+
+  /* Improve camera and crop screens */
+  #cameraBox {
+    width: 100%;
+  }
+
+  .crop-dialog {
+    width: 96vw !important;
+    max-width: 600px !important;
+  }
+
+  /* Readable footer */
+  footer {
+    font-size: 12px !important;
+    line-height: 1.6 !important;
+    text-align: center;
+  }
+}
+
+/* Very small phones */
+@media screen and (max-width: 390px) {
+
+  .wrap {
+    padding: 8px !important;
+  }
+
+  section {
+    padding: 12px !important;
+  }
+
+  .site-title h1 {
+    font-size: 18px !important;
+  }
+
+  #letter {
+    font-size: 70px !important;
+  }
+
+  .buttons button {
+    font-size: 13px !important;
+  }
+}
+
 
 </style>
 
