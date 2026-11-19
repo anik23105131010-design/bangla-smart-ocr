@@ -285,8 +285,7 @@ footer { margin-top:15px; color:#94a3b8; font-size:12px; }
 </footer>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-tflite@0.0.1-alpha.10/dist/tf-tflite.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.js"></script>
 
 <script>
 const $ = id => document.getElementById(id);
@@ -706,22 +705,21 @@ async function recognize(number) {
     const hash=await imageHash(prepared.bytes);
     if(number!==requestNumber)return;
 
-    const tensor=tf.tensor4d(
-      prepared.input,[1,64,64,1],"float32"
+
+    const tensor = new ort.Tensor(
+      "float32",
+      prepared.input,
+      [1, 64, 64, 1]
     );
 
-    let result;
-    try {
-      result=model.predict(tensor);
-      const output=Array.isArray(result)?result[0]:result;
-      var scores=Array.from(await output.data());
-    } finally {
-      tensor.dispose();
-      if(result) {
-        (Array.isArray(result)?result:[result])
-          .forEach(t=>t.dispose?.());
-      }
-    }
+    const feeds = {};
+    feeds[model.inputNames[0]] = tensor;
+
+    const outputs = await model.run(feeds);
+
+    const scores = Array.from(
+      outputs[model.outputNames[0]].data
+    );
 
     if(number!==requestNumber)return;
 
@@ -847,19 +845,26 @@ async function loadModel() {
       $("correctLetter").appendChild(option);
     });
 
-    if(!window.tf||!window.tflite) {
-      throw Error("Browser AI libraries did not load.");
+
+    if(!window.ort || !ort.InferenceSession) {
+      throw Error("ONNX Runtime Web library did not load.");
     }
 
-    await tf.ready();
+    // GitHub Pages-compatible single-threaded WASM.
+    ort.env.wasm.numThreads = 1;
+    ort.env.wasm.wasmPaths =
+      "https://cdn.jsdelivr.net/npm/" +
+      "onnxruntime-web@1.20.1/dist/";
 
-    tflite.setWasmPath(
-      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-tflite@0.0.1-alpha.10/dist/"
+    model = await ort.InferenceSession.create(
+      "./model/bangla_cnn.onnx",
+      {
+        executionProviders: ["wasm"]
+      }
     );
 
-    model=await tflite.loadTFLiteModel(
-      "./model/bangla_cnn.tflite"
-    );
+    console.log("ONNX inputs:", model.inputNames);
+    console.log("ONNX outputs:", model.outputNames);
 
     $("status").textContent="● CNN Ready • 50 Classes";
     $("status").style.color="#29db83";
