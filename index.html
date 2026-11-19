@@ -314,6 +314,46 @@ body:not(.light-theme) #themeToggle {
   color: var(--muted);
 }
 
+/* Bengali Heritage Background */
+
+body {
+  background-image:
+    linear-gradient(
+      rgba(13, 20, 34, 0.62),
+      rgba(13, 20, 34, 0.62)
+    ),
+    url("./20984.jpg");
+
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* Dark mode panels */
+body:not(.light-theme) header,
+body:not(.light-theme) section {
+  background: rgba(30, 41, 59, 0.91);
+  backdrop-filter: blur(8px);
+}
+
+/* Light mode background */
+body.light-theme {
+  background-image:
+    linear-gradient(
+      rgba(255, 250, 240, 0.38),
+      rgba(255, 250, 240, 0.38)
+    ),
+    url("./20984.jpg");
+}
+
+/* Light mode panels */
+body.light-theme header,
+body.light-theme section {
+  background: rgba(255, 255, 255, 0.90);
+  backdrop-filter: blur(8px);
+}
+
 </style>
 </head>
 <body>
