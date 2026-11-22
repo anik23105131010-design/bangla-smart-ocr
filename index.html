@@ -2208,5 +2208,88 @@ if ("serviceWorker" in navigator) {
 })();
 </script>
 
+
+<script id="v3MainPronounceFix">
+(function() {
+  const oldBtn = document.getElementById("speak");
+  if (!oldBtn || !oldBtn.parentNode) return;
+
+  // Replace button node to clear any old click listeners cleanly
+  const speakBtn = oldBtn.cloneNode(true);
+  oldBtn.parentNode.replaceChild(speakBtn, oldBtn);
+
+  const FALLBACK_NAMES = {
+    "ঁ": "চন্দ্রবিন্দু",
+    "ং": "অনুস্বার",
+    "ঃ": "বিসর্গ",
+    "ৎ": "খণ্ড ত"
+  };
+
+  speakBtn.onclick = async function() {
+    const status = document.getElementById("pronunciationStatus");
+    const letterEl = document.getElementById("letter");
+    const ch = letterEl ? letterEl.textContent.trim() : "";
+
+    if (!ch || ch === "?") {
+      if (status) status.textContent = "Recognize a Bengali letter first.";
+      return;
+    }
+
+    // 1. Load audio/map.json once
+    if (!window._banglaAudioMap) {
+      try {
+        const mapResp = await fetch("./audio/map.json", { cache: "no-cache" });
+        if (mapResp.ok) {
+          window._banglaAudioMap = await mapResp.json();
+        }
+      } catch (e) {}
+    }
+
+    // 2. Play matching MP3 from ./audio/00.mp3..49.mp3
+    try {
+      const map = window._banglaAudioMap || {};
+      const nfc = ch.normalize ? ch.normalize("NFC") : ch;
+      const fileName = map[ch] || map[nfc];
+      if (fileName) {
+        const audioResp = await fetch("./audio/" + fileName, { cache: "no-cache" });
+        if (audioResp.ok) {
+          const blob = await audioResp.blob();
+          if (window.activeBanglaAudio) window.activeBanglaAudio.pause();
+          if (window.activeBanglaAudioUrl) URL.revokeObjectURL(window.activeBanglaAudioUrl);
+          const blobUrl = URL.createObjectURL(blob);
+          window.activeBanglaAudioUrl = blobUrl;
+          const audio = new Audio(blobUrl);
+          window.activeBanglaAudio = audio;
+          await audio.play();
+          if (status) status.textContent = "Playing recorded Bengali audio.";
+          return;
+        }
+      }
+    } catch (e) {}
+
+    // 3. Fallback to Android TTS or browser voice if MP3 is missing
+    const spoken = FALLBACK_NAMES[ch] || ch;
+    if (window.AndroidTTS && window.AndroidTTS.speakBengali(spoken)) {
+      if (status) status.textContent = "Speaking Bengali pronunciation...";
+      return;
+    }
+    if ("speechSynthesis" in window) {
+      const voice = speechSynthesis.getVoices().find(v => v.lang.toLowerCase().startsWith("bn"));
+      if (voice) {
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(spoken);
+        u.lang = voice.lang;
+        u.voice = voice;
+        u.rate = 0.85;
+        speechSynthesis.speak(u);
+        if (status) status.textContent = "Using Bengali browser voice.";
+        return;
+      }
+    }
+    if (status) status.textContent = "Bengali audio is unavailable.";
+  };
+})();
+</script>
+
 </body>
 </html>
