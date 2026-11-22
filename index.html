@@ -557,6 +557,258 @@ body:not(.light-theme) section {
 }
 
 
+
+/* === PAD THEMES (DARK / CHALK SLATE / NOTEBOOK) === */
+.pad-theme-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 0 0 12px;
+}
+.pad-theme-btn {
+  background: #2b3b52;
+  color: #f8fafc;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 9px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+body.light-theme .pad-theme-btn {
+  background: #e2e8f0;
+  color: #17263c;
+}
+.pad-theme-btn.active {
+  border-color: #38bdf8;
+  background: #1d4ed8 !important;
+  color: #ffffff !important;
+}
+.canvas-box {
+  position: relative;
+}
+.canvas-box canvas {
+  position: relative;
+  z-index: 2;
+}
+.canvas-box .guides {
+  z-index: 3;
+}
+.paper-lines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: none;
+  z-index: 1;
+  background-image:
+    linear-gradient(to right, transparent 10.5%, rgba(239, 68, 68, 0.4) 10.5%, rgba(239, 68, 68, 0.4) 11%, transparent 11%),
+    repeating-linear-gradient(to bottom, transparent 0px, transparent 34px, rgba(59, 130, 246, 0.3) 35px);
+}
+.canvas-box.pad-slate {
+  background: #163a2c !important;
+  border: 7px solid #8b5a2b !important;
+  box-shadow: inset 0 0 26px rgba(0, 0, 0, 0.45);
+}
+.canvas-box.pad-slate canvas {
+  mix-blend-mode: screen;
+}
+.canvas-box.pad-slate .guides {
+  opacity: 0.45;
+  background:
+    linear-gradient(to right, transparent 49.8%, #a7f3d0 50%, transparent 50.2%),
+    linear-gradient(to bottom, transparent 26%, #a7f3d0 26.3%, transparent 26.6%),
+    linear-gradient(to bottom, transparent 50%, #a7f3d0 50.3%, transparent 50.6%);
+}
+.canvas-box.pad-slate .guides span {
+  color: #bbf7d0;
+}
+.canvas-box.pad-notebook {
+  background: #fcfaf2 !important;
+  border: 2px solid #94a3b8 !important;
+}
+.canvas-box.pad-notebook .paper-lines {
+  display: block;
+}
+.canvas-box.pad-notebook canvas {
+  filter: invert(1);
+  mix-blend-mode: multiply;
+}
+.canvas-box.pad-notebook .guides {
+  opacity: 0.55;
+  background:
+    linear-gradient(to right, transparent 49.8%, #94a3b8 50%, transparent 50.2%),
+    linear-gradient(to bottom, transparent 26%, #ef4444 26.3%, transparent 26.6%),
+    linear-gradient(to bottom, transparent 50%, #94a3b8 50.3%, transparent 50.6%);
+}
+.canvas-box.pad-notebook .guides span {
+  color: #dc2626;
+}
+#traceOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 4;
+  font-size: clamp(160px, 44vw, 250px);
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.22);
+  user-select: none;
+  line-height: 1;
+}
+.canvas-box.pad-notebook #traceOverlay {
+  color: rgba(30, 58, 138, 0.16);
+}
+#traceBanner {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(37, 99, 235, 0.16);
+  border: 1px solid #3b82f6;
+  font-size: 13px;
+}
+#traceBanner button {
+  padding: 6px 10px;
+  font-size: 12px;
+  min-height: 32px !important;
+}
+
+/* === 50-LETTER VARNAMALA EXPLORER MODAL (WEBVIEW-SAFE) === */
+.varnamala-open-btn {
+  width: 100%;
+  margin-top: 8px;
+  background: #0d9488 !important;
+  color: #ffffff !important;
+}
+.varnamala-modal {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(5, 12, 25, 0.88);
+  display: block;
+  overflow-y: auto;
+  padding: 14px 10px 36px;
+  z-index: 99998;
+  box-sizing: border-box;
+}
+.varnamala-modal[hidden] {
+  display: none !important;
+}
+.varnamala-dialog {
+  position: relative;
+  width: 100%;
+  max-width: 660px;
+  margin: 8px auto;
+  padding: 18px 14px 22px;
+  background: #ffffff;
+  color: #17263c;
+  border-radius: 16px;
+  box-sizing: border-box;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.4);
+}
+.varnamala-dialog h2 {
+  margin: 0 0 4px;
+  padding-right: 84px;
+  font-size: 19px;
+  color: #0f172a;
+}
+.varnamala-sub {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: #475569;
+}
+#closeVarnamala {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: #dc2626;
+  color: #ffffff;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.varnamala-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+.varnamala-card-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+#vBigChar {
+  font-size: 56px;
+  font-weight: 700;
+  color: #0f766e;
+  line-height: 1.1;
+  min-width: 56px;
+  text-align: center;
+}
+#vWord {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+}
+#vMeta {
+  font-size: 12px;
+  color: #475569;
+  margin-top: 3px;
+}
+.varnamala-card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.varnamala-card-actions button {
+  padding: 9px 12px;
+  font-size: 13px;
+  min-height: 40px;
+}
+.varnamala-group-title {
+  margin: 14px 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+}
+.varnamala-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
+  gap: 7px;
+}
+.v-tile {
+  background: #f8fafc;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 10px 4px;
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+}
+.v-tile.selected {
+  background: #0d9488;
+  color: #ffffff;
+  border-color: #0f766e;
+}
+
 </style>
 
 <!-- Bangla Smart OCR PWA -->
@@ -589,9 +841,18 @@ body:not(.light-theme) section {
 <section>
   <h2>Drawing Pad / Camera / Upload</h2>
 
-  <div class="canvas-box" id="dropZone">
+  
+<div class="pad-theme-bar" role="group" aria-label="Drawing Pad Theme">
+  <button type="button" class="pad-theme-btn active" data-pad-theme="dark">Dark Pad</button>
+  <button type="button" class="pad-theme-btn" data-pad-theme="slate">Chalk Slate</button>
+  <button type="button" class="pad-theme-btn" data-pad-theme="notebook">Notebook</button>
+</div>
+<div class="canvas-box" id="dropZone">
     <canvas id="pad" width="512" height="512"></canvas>
-    <div class="guides" id="guides">
+    
+<div class="paper-lines" aria-hidden="true"></div>
+<div id="traceOverlay" aria-hidden="true"></div>
+<div class="guides" id="guides">
       <span>মাত্রা (Matra guide)</span>
     </div>
     <div id="cameraBox" hidden>
@@ -625,6 +886,15 @@ body:not(.light-theme) section {
     <button id="upload">Upload / Photo</button>
     <button id="saveDrawing">Save PNG</button>
   </div>
+
+<div id="traceBanner">
+  <span id="traceLabel">Tracing letter</span>
+  <button type="button" class="red" id="clearTraceBtn">Hide Trace</button>
+</div>
+<button type="button" class="varnamala-open-btn" id="openVarnamala">
+  বর্ণমালা — 50-Letter Varnamala Explorer
+</button>
+
 
   <input id="file" type="file" accept="image/*" hidden>
   <input id="nativeCamera" type="file"
@@ -721,6 +991,32 @@ body:not(.light-theme) section {
     </div>
 
     <p id="cropStatus"></p>
+  </div>
+</div>
+
+
+<div id="varnamalaModal" class="varnamala-modal" hidden>
+  <div class="varnamala-dialog">
+    <h2>বাংলা বর্ণমালা (50 Letters)</h2>
+    <p class="varnamala-sub">Tap any letter to hear its Bengali pronunciation, see an example word, or trace it on the pad.</p>
+    <button id="closeVarnamala" type="button">X Close</button>
+    <div class="varnamala-card">
+      <div class="varnamala-card-left">
+        <div id="vBigChar">অ</div>
+        <div>
+          <div id="vWord">অজগর (Python)</div>
+          <div id="vMeta">স্বরবর্ণ • Vowel</div>
+        </div>
+      </div>
+      <div class="varnamala-card-actions">
+        <button id="vSpeakBtn" class="blue" type="button">Pronounce</button>
+        <button id="vTraceBtn" class="green" type="button">Trace on Pad</button>
+      </div>
+    </div>
+    <div class="varnamala-group-title">স্বরবর্ণ — Vowels (11)</div>
+    <div id="vowelGrid" class="varnamala-grid"></div>
+    <div class="varnamala-group-title">ব্যঞ্জনবর্ণ ও চিহ্ন — Consonants &amp; Signs (39)</div>
+    <div id="consonantGrid" class="varnamala-grid"></div>
   </div>
 </div>
 
@@ -1691,6 +1987,225 @@ if ("serviceWorker" in navigator) {
   });
 
 }
+</script>
+
+
+<script id="v3FeaturesScript">
+(function() {
+  const byId = id => document.getElementById(id);
+
+  // === PAD THEMES (DARK / CHALK SLATE / NOTEBOOK) ===
+  const PAD_LABELS = { dark: "Dark Pad", slate: "Chalk Slate", notebook: "Notebook" };
+  let currentPadTheme = localStorage.getItem("banglaOCRPadTheme") || "dark";
+  if (!PAD_LABELS[currentPadTheme]) currentPadTheme = "dark";
+
+  function applyPadTheme(themeName, announce) {
+    if (!PAD_LABELS[themeName]) themeName = "dark";
+    currentPadTheme = themeName;
+    localStorage.setItem("banglaOCRPadTheme", themeName);
+    const box = byId("dropZone");
+    if (box) {
+      box.classList.remove("pad-dark", "pad-slate", "pad-notebook");
+      box.classList.add("pad-" + themeName);
+    }
+    document.querySelectorAll(".pad-theme-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.padTheme === themeName);
+    });
+    if (announce && typeof message === "function") {
+      message("Drawing pad set to " + PAD_LABELS[themeName] + ".");
+    }
+  }
+
+  document.querySelectorAll(".pad-theme-btn").forEach(btn => {
+    btn.addEventListener("click", () => applyPadTheme(btn.dataset.padTheme, true));
+  });
+  applyPadTheme(currentPadTheme, false);
+
+  // === TRACE OVERLAY ===
+  function setTraceLetter(ch) {
+    const overlay = byId("traceOverlay");
+    const banner = byId("traceBanner");
+    if (!overlay || !banner) return;
+    if (!ch) {
+      overlay.textContent = "";
+      banner.style.display = "none";
+      return;
+    }
+    overlay.textContent = ch;
+    const lbl = byId("traceLabel");
+    if (lbl) lbl.textContent = "Tracing: " + ch + " (draw over the faint letter)";
+    banner.style.display = "flex";
+  }
+
+  const clearTraceBtn = byId("clearTraceBtn");
+  if (clearTraceBtn) clearTraceBtn.onclick = () => setTraceLetter("");
+
+  // === 50-LETTER VARNAMALA EXPLORER ===
+  const VARNAMALA_VOWELS = [
+    ["অ", "অজগর (Python)"],
+    ["আ", "আম (Mango)"],
+    ["ই", "ইলিশ (Hilsa Fish)"],
+    ["ঈ", "ঈগল (Eagle)"],
+    ["উ", "উট (Camel)"],
+    ["ঊ", "ঊষা (Dawn)"],
+    ["ঋ", "ঋতু (Season)"],
+    ["এ", "একতারা (Ektara)"],
+    ["ঐ", "ঐরাবত (Elephant)"],
+    ["ও", "ওল (Yam)"],
+    ["ঔ", "ঔষধ (Medicine)"]
+  ];
+
+  const VARNAMALA_CONSONANTS = [
+    ["ক", "কলম (Pen)"],
+    ["খ", "খরগোশ (Rabbit)"],
+    ["গ", "গরু (Cow)"],
+    ["ঘ", "ঘুড়ি (Kite)"],
+    ["ঙ", "ব্যাঙ (Frog)"],
+    ["চ", "চশমা (Glasses)"],
+    ["ছ", "ছাতা (Umbrella)"],
+    ["জ", "জাহাজ (Ship)"],
+    ["ঝ", "ঝিনুক (Shell)"],
+    ["ঞ", "মিঞা (Miya)"],
+    ["ট", "টুপি (Cap)"],
+    ["ঠ", "ঠেলাগাড়ি (Handcart)"],
+    ["ড", "ডাব (Green Coconut)"],
+    ["ঢ", "ঢোল (Drum)"],
+    ["ণ", "হরিণ (Deer)"],
+    ["ত", "তরমুজ (Watermelon)"],
+    ["থ", "থালা (Plate)"],
+    ["দ", "দোয়েল (Magpie Robin)"],
+    ["ধ", "ধান (Paddy)"],
+    ["ন", "নৌকা (Boat)"],
+    ["প", "পাখি (Bird)"],
+    ["ফ", "ফুল (Flower)"],
+    ["ব", "বই (Book)"],
+    ["ভ", "ভালুক (Bear)"],
+    ["ম", "ময়ূর (Peacock)"],
+    ["য", "যন্ত্র (Machine)"],
+    ["র", "রংধনু (Rainbow)"],
+    ["ল", "লাটিম (Spinning Top)"],
+    ["শ", "শাপলা (Water Lily)"],
+    ["ষ", "ষাঁড় (Bull)"],
+    ["স", "সূর্য (Sun)"],
+    ["হ", "হাতি (Elephant)"],
+    ["ড়", "ঘড়ি (Watch)"],
+    ["ঢ়", "আষাঢ় (Monsoon)"],
+    ["য়", "ময়না (Myna Bird)"],
+    ["ৎ", "মৎস্য (Fish)"],
+    ["ং", "চিংড়ি (Shrimp)"],
+    ["ঃ", "দুঃখ (Sorrow)"],
+    ["ঁ", "চাঁদ (Moon)"]
+  ];
+
+  const VARNAMALA_SPOKEN = {
+    "ঁ": "চন্দ্রবিন্দু",
+    "ং": "অনুস্বার",
+    "ঃ": "বিসর্গ",
+    "ৎ": "খণ্ড ত"
+  };
+
+  let selectedVarnamala = { ch: "অ", word: "অজগর (Python)", type: "স্বরবর্ণ • Vowel" };
+
+  async function playExplorerAudio(ch) {
+    const meta = byId("vMeta");
+    const baseText = selectedVarnamala.type;
+    if (!window._banglaAudioMap) {
+      try {
+        const m = await fetch("./audio/map.json");
+        if (m.ok) window._banglaAudioMap = await m.json();
+      } catch (e) {}
+    }
+    try {
+      const map = window._banglaAudioMap || {};
+      const nfc = ch.normalize ? ch.normalize("NFC") : ch;
+      const fname = map[ch] || map[nfc];
+      if (fname) {
+        const r = await fetch("./audio/" + fname);
+        if (r.ok) {
+          const blob = await r.blob();
+          if (window.activeBanglaAudio) window.activeBanglaAudio.pause();
+          if (window.activeBanglaAudioUrl) URL.revokeObjectURL(window.activeBanglaAudioUrl);
+          const burl = URL.createObjectURL(blob);
+          window.activeBanglaAudioUrl = burl;
+          const a = new Audio(burl);
+          window.activeBanglaAudio = a;
+          await a.play();
+          if (meta) meta.textContent = baseText + " • Playing offline MP3";
+          return;
+        }
+      }
+    } catch (e) {}
+
+    const spoken = VARNAMALA_SPOKEN[ch] || ch;
+    if (window.AndroidTTS && window.AndroidTTS.speakBengali(spoken)) {
+      if (meta) meta.textContent = baseText + " • Speaking...";
+      return;
+    }
+    if ("speechSynthesis" in window) {
+      const v = speechSynthesis.getVoices().find(x => x.lang.toLowerCase().startsWith("bn"));
+      if (v) {
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(spoken);
+        u.lang = v.lang; u.voice = v; u.rate = 0.85;
+        speechSynthesis.speak(u);
+        if (meta) meta.textContent = baseText + " • Speaking...";
+        return;
+      }
+    }
+    if (meta) meta.textContent = baseText;
+  }
+
+  function buildVarnamalaGrid(containerId, items, typeLabel) {
+    const grid = byId(containerId);
+    if (!grid) return;
+    grid.replaceChildren();
+    items.forEach(([ch, word]) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "v-tile";
+      b.textContent = ch;
+      b.onclick = () => {
+        document.querySelectorAll(".v-tile").forEach(t => t.classList.remove("selected"));
+        b.classList.add("selected");
+        selectedVarnamala = { ch, word, type: typeLabel };
+        byId("vBigChar").textContent = ch;
+        byId("vWord").textContent = word;
+        byId("vMeta").textContent = typeLabel;
+        playExplorerAudio(ch);
+      };
+      grid.appendChild(b);
+    });
+  }
+
+  buildVarnamalaGrid("vowelGrid", VARNAMALA_VOWELS, "স্বরবর্ণ • Vowel");
+  buildVarnamalaGrid("consonantGrid", VARNAMALA_CONSONANTS, "ব্যঞ্জনবর্ণ • Consonant / Sign");
+
+  const modal = byId("varnamalaModal");
+  const openBtn = byId("openVarnamala");
+  const closeBtn = byId("closeVarnamala");
+  if (openBtn && modal) openBtn.onclick = () => { modal.hidden = false; };
+  if (closeBtn && modal) closeBtn.onclick = () => { modal.hidden = true; };
+  if (modal) {
+    modal.addEventListener("click", e => {
+      if (e.target === modal) modal.hidden = true;
+    });
+  }
+  const speakBtn = byId("vSpeakBtn");
+  if (speakBtn) speakBtn.onclick = () => playExplorerAudio(selectedVarnamala.ch);
+
+  const traceBtn = byId("vTraceBtn");
+  if (traceBtn) {
+    traceBtn.onclick = () => {
+      if (modal) modal.hidden = true;
+      const clearBtn = byId("clear");
+      if (clearBtn) clearBtn.click();
+      setTraceLetter(selectedVarnamala.ch);
+      if (typeof message === "function") {
+        message("Trace " + selectedVarnamala.ch + " on the pad, then check your CNN match!");
+      }
+    };
+  }
+})();
 </script>
 
 </body>
